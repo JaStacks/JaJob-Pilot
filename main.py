@@ -1,6 +1,7 @@
 from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
 
+
 with sync_playwright() as p:
 
     browser = p.chromium.launch()
@@ -10,7 +11,8 @@ with sync_playwright() as p:
     )
 
     page = context.new_page()
-    page.goto("https://www.indeed.com/jobs?q=&l=irvine%2C%20ca&from=searchOnHP")
+    page.goto("https://app.joinhandshake.com/career_fairs/50357/employers_list?ajax=true&query=&category=StudentRegistration&page=2&per_page=25&sort_direction=asc&sort_column=default&followed_only=false&qualified_only=&core_schools_only=false&including_all_facets_in_searches=true")
+    page.fill('input#email-address-identifier', env.username);
     page.screenshot(path="screenshot.jpg", full_page=True)
 
     content = page.content()
