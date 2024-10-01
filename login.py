@@ -26,19 +26,20 @@ def login_logic(page):
 
     # Select the specific school
     page.click(f"div.select2-result-label:has-text('{school_name}')")
+    page.wait_for_selector("a.sso-button", timeout=60000)
+    page.click("a.sso-button")
 
-    # Fill in the email field
-    page.fill('input#email-address-identifier', env['username'])
+    # Wait for redirection to the Duo login page
+    page.wait_for_selector('input#j_username', timeout=60000)
 
-    # Authenticity token handling (assuming dynamic value)
-    authenticity_token = page.get_attribute('input[name="authenticity_token"]')
-    if authenticity_token:
-        page.fill('input[name="authenticity_token"]', authenticity_token)
-    
-    # Click on the submit button to proceed with login
-    page.click('button[type="submit"]')
+    # Fill in the Duo authentication form
+    page.fill('input#j_username', env['username'])  # Fill in UCInetID
+    page.fill('input#j_password', env['password'])  # Fill in Password
 
-    # Wait for navigation or Duo authentication page
+    # Click the login button
+    page.click('input[type="submit"][name="submit_form"]')
+
+    # Wait for Duo authentication step to complete
     input("Please complete Duo authentication in the opened browser, then press Enter...")
 
     # Save authentication state after successful login
