@@ -2,12 +2,22 @@ import json
 from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
 
-def login_logic(page):
+def login_logic(browser):
+    page = browser.new_page()
     # Load environment variables from .env.json using json.loads
     with open('.env.json', 'r') as f:
         raw_data = f.read()
         env = json.loads(raw_data)  # Correctly parse JSON data to a dictionary
 
+    # Go to the login page
+    page.goto("https://app.joinhandshake.com/login")
+
+    # Check if the user is already logged in by looking for elements only present when authenticated
+    if page.url != "https://app.joinhandshake.com/login":
+        print("Already authenticated, no login required.")
+        return page
+    
+    print("Not authenticated, proceeding with login...")
     # Go to the login page
     page.goto("https://app.joinhandshake.com/login")
 
@@ -39,10 +49,16 @@ def login_logic(page):
     # Click the login button
     page.click('input[type="submit"][name="submit_form"]')
 
-    # Wait for Duo authentication step to complete
-    input("Please complete Duo authentication in the opened browser, then press Enter...")
+    try:
+        # Wait for the button to appear
+        page.wait_for_selector("button#trust-browser-button", timeout=60000)
+        # Click the button
+        page.click("button#trust-browser-button")
+    except Exception as e:
+        print("Unable to click the 'Yes, this is my device' button:", e)
 
     # Save authentication state after successful login
     page.context.storage_state(path='auth.json')
 
+    input("Waiting for authentication, enter to close:")
     return page  # Return the page object for further use if needed

@@ -8,15 +8,14 @@ from login import login_logic
 def main():
     with sync_playwright() as p:
         # Launch the browser
-        browser = p.chromium.launch(headless=False)  # Keep headless=False to see what's happening
-        context = browser.new_context()  # Corrected from 'content' to 'context'
-        page = context.new_page()
+        browser = p.chromium.launch_persistent_context(user_data_dir='./user_data', # Store persistent context
+                                                        headless=False)  # Keep headless=False to see what's happening
 
         # Call login logic function
-        login_logic(page)
+        login_logic(browser)
 
         # Use authenticated context to access the desired page
-        page = context.new_page()
+        page = browser.new_page()
         page.goto("https://app.joinhandshake.com/career_fairs/50357/employers_list?ajax=true&query=&category=StudentRegistration&page=2&per_page=25&sort_direction=asc&sort_column=default&followed_only=false&qualified_only=&core_schools_only=false&including_all_facets_in_searches=true")
 
         # Take a screenshot
@@ -29,6 +28,7 @@ def main():
             f.write(soup.prettify())
 
         # Close browser
+        input("Enter to close browser")
         browser.close()
 
 if __name__ == "__main__":
